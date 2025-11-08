@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
+import 'package:get/get_core/get_core.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:get/instance_manager.dart';
 
 class ChatList extends StatefulWidget {
   const ChatList({super.key});
@@ -8,6 +12,8 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> {
+  final c = Get.find<DashboardController>();
+
   @override
   Widget build(BuildContext context) {
     final chats = List.generate(10, (i) => "Contact $i");
@@ -49,12 +55,23 @@ class _ChatListState extends State<ChatList> {
             child: ListView.builder(
               itemCount: chats.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  leading: CircleAvatar(),
-                  title: Text(chats[index]),
-                  subtitle: Text("Last message preview..."),
-                  trailing: Text("12m"),
-                );
+                return Obx(() {
+                  final isSelected = c.selectedChatId.value == index;
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: isSelected ? Color.fromARGB(255, 238, 238, 238) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ListTile(
+                      leading: CircleAvatar(),
+                      title: Text(chats[index]),
+                      subtitle: Text("Last message preview..."),
+                      trailing: Text("12m"),
+                      onTap: () => c.selectChat(index),
+                    ),
+                  );
+                });
               },
             ),
           ),

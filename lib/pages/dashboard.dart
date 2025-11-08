@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_screen/components/chat_detail.dart';
 import 'package:flutter_chat_screen/components/chat_list.dart';
 import 'package:flutter_chat_screen/components/sidebar.dart';
+import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
+import 'package:get/get_core/get_core.dart';
+import 'package:get/instance_manager.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -11,6 +14,8 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  final DashboardController c = Get.put(DashboardController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
