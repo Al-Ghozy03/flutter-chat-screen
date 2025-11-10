@@ -3,28 +3,28 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_screen/api/auth.dart';
 import 'package:flutter_chat_screen/pages/dashboard.dart';
-import 'package:flutter_chat_screen/pages/register.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final emailController = TextEditingController();
+  final nameController = TextEditingController();
   final passwordController = TextEditingController();
   final box = GetStorage();
 
   @override
   Widget build(BuildContext context) {
-    void handleLogin() async {
+    void handleRegister() async {
       try {
-        final response =
-            await login(emailController.text, passwordController.text);
+        final response = await register(
+            emailController.text, nameController.text, passwordController.text);
         box.write("token", response["token"]);
         box.write("identity", jsonEncode(response["data"]));
         Get.off(() => DashboardPage());
@@ -55,12 +55,12 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Welcome Back 👋',
+                'Register',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Login to your dashboard',
+                'Register your account',
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 32),
@@ -71,6 +71,21 @@ class _LoginPageState extends State<LoginPage> {
                 controller: emailController,
                 decoration: InputDecoration(
                   hintText: 'Enter your email',
+                  filled: true,
+                  fillColor: const Color(0xFFF0F2F5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your name',
                   filled: true,
                   fillColor: const Color(0xFFF0F2F5),
                   border: OutlineInputBorder(
@@ -107,21 +122,13 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () => handleLogin(),
+                  onPressed: () => handleRegister(),
                   child: const Text(
-                    'Login',
+                    'Register',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Center(
-                child: TextButton(
-                  onPressed: () => Get.to(() => RegisterPage()),
-                  child: const Text('Register account',
-                      style: TextStyle(color: Colors.grey)),
-                ),
-              )
             ],
           ),
         ),
