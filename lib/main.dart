@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_screen/pages/dashboard.dart';
+import 'package:flutter_chat_screen/pages/login.dart';
 import 'package:get/route_manager.dart';
+import 'package:get_storage/get_storage.dart';
 
-void main() {
+void main() async {
+  await GetStorage.init();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
+    final box = GetStorage();
     return GetMaterialApp(
         title: 'Flutter Chat Screen',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: DashboardPage());
+        home: box.read("token") == null ? LoginPage() : DashboardPage());
   }
 }

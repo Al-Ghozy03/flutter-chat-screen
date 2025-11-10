@@ -60,7 +60,9 @@ class _ChatListState extends State<ChatList> {
 
                   return Container(
                     decoration: BoxDecoration(
-                      color: isSelected ? Color.fromARGB(255, 238, 238, 238) : Colors.transparent,
+                      color: isSelected
+                          ? Color.fromARGB(255, 238, 238, 238)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: ListTile(
