@@ -3,7 +3,8 @@ import 'package:flutter_chat_screen/components/chat_detail.dart';
 import 'package:flutter_chat_screen/components/chat_list.dart';
 import 'package:flutter_chat_screen/components/sidebar.dart';
 import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
-import 'package:get/get_core/get_core.dart';
+import 'package:flutter_chat_screen/models/identity.dart';
+import 'package:flutter_chat_screen/utils/storage.dart';
 import 'package:get/instance_manager.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -15,6 +16,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   final DashboardController c = Get.put(DashboardController());
+  final Identity identity = getIdentity();
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +32,13 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
 
           // CHAT LIST
-          Expanded(
+          const Expanded(
             flex: 2,
             child: ChatList(),
           ),
 
           // CHAT DETAIL
-          Expanded(
+          const Expanded(
             flex: 3,
             child: ChatDetail(),
           ),

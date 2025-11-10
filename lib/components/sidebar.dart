@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_screen/models/identity.dart';
+import 'package:flutter_chat_screen/utils/storage.dart';
 
 class Sidebar extends StatefulWidget {
   const Sidebar({super.key});
@@ -8,6 +10,7 @@ class Sidebar extends StatefulWidget {
 }
 
 class _SidebarState extends State<Sidebar> {
+  final Identity identity = getIdentity();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -26,9 +29,9 @@ class _SidebarState extends State<Sidebar> {
           Spacer(),
           Row(
             children: [
-              CircleAvatar(radius: 20, backgroundColor: Colors.grey),
+              CircleAvatar(radius: 20, child: Icon(Icons.person)),
               SizedBox(width: 10),
-              Text("Jhon Doe"),
+              Text(identity.name),
             ],
           )
         ],
