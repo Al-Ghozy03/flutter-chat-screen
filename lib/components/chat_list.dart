@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_screen/api/chats.dart';
 import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
 import 'package:flutter_chat_screen/models/chat_model.dart';
 import 'package:flutter_chat_screen/models/identity.dart';
@@ -9,7 +8,8 @@ import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/instance_manager.dart';
 
 class ChatList extends StatefulWidget {
-  const ChatList({super.key});
+  ChatModel chats;
+  ChatList({super.key, required this.chats});
 
   @override
   State<ChatList> createState() => _ChatListState();
@@ -17,14 +17,7 @@ class ChatList extends StatefulWidget {
 
 class _ChatListState extends State<ChatList> {
   final c = Get.find<DashboardController>();
-  late Future getChat;
   final Identity identity = getIdentity();
-
-  @override
-  void initState() {
-    getChat = ChatService().getListChat();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,27 +55,12 @@ class _ChatListState extends State<ChatList> {
 
           // LIST CHAT
           Expanded(
-            child: FutureBuilder(
-              future: getChat,
-              builder: (context, AsyncSnapshot snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) return Text("Error: ${snapshot.error}");
-
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                    itemCount: snapshot.data.data.length,
-                    itemBuilder: (context, index) {
-                      return _listChat(snapshot.data, index, identity);
-                    },
-                  );
-                }
-                return const Text("Empty");
-              },
-            ),
-          ),
+              child: ListView.builder(
+            itemCount: widget.chats.data.length,
+            itemBuilder: (context, index) {
+              return _listChat(widget.chats, index, identity);
+            },
+          )),
         ],
       ),
     );

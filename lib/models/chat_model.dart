@@ -10,7 +10,7 @@ String chatModelToJson(ChatModel data) => json.encode(data.toJson());
 
 class ChatModel {
     String message;
-    List<Datum> data;
+    List<DataChat> data;
 
     ChatModel({
         required this.message,
@@ -19,7 +19,7 @@ class ChatModel {
 
     factory ChatModel.fromJson(Map<String, dynamic> json) => ChatModel(
         message: json["message"],
-        data: List<Datum>.from(json["data"].map((x) => Datum.fromJson(x))),
+        data: List<DataChat>.from(json["data"].map((x) => DataChat.fromJson(x))),
     );
 
     Map<String, dynamic> toJson() => {
@@ -28,14 +28,14 @@ class ChatModel {
     };
 }
 
-class Datum {
+class DataChat {
     int id;
     String roomCode;
     User user1;
     User user2;
     List<Message> messages;
 
-    Datum({
+    DataChat({
         required this.id,
         required this.roomCode,
         required this.user1,
@@ -43,7 +43,7 @@ class Datum {
         required this.messages,
     });
 
-    factory Datum.fromJson(Map<String, dynamic> json) => Datum(
+    factory DataChat.fromJson(Map<String, dynamic> json) => DataChat(
         id: json["id"],
         roomCode: json["room_code"],
         user1: User.fromJson(json["user1"]),
