@@ -8,12 +8,12 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class ChatDetail extends StatefulWidget {
-  final List<Message> message;
+  // final List<Message> message;
   final String roomCode;
   final User user;
   ChatDetail({
     super.key,
-    required this.message,
+    // required this.message,
     required this.roomCode,
     required this.user,
   });
@@ -28,33 +28,24 @@ class _ChatDetailState extends State<ChatDetail> {
   final DashboardController c = Get.find<DashboardController>();
 
   late TextEditingController textEditingController;
-  late RxList<Message> messages;
-  late ScrollController scrollController;
+  // late RxList<Message> messages;
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-
     textEditingController = TextEditingController();
-    scrollController = ScrollController();
-
-    // copy pesan awal dari API
-    messages = RxList<Message>.from(widget.message);
-
-    // scroll ke bawah setelah widget build pertama kali
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
-    // listen setiap ada pesan baru dari socket
     ever(socketService.newMessage, (msg) {
       if (msg == null) return;
 
       if (msg.roomCode == widget.roomCode) {
-        messages.add(msg);
+        c.addMessage(widget.roomCode, msg);
         _scrollToBottom();
       }
     });
 
-    // join room
     socketService.joinRoom(widget.roomCode);
   }
 
@@ -95,19 +86,23 @@ class _ChatDetailState extends State<ChatDetail> {
           // CHAT CONTENT
           Expanded(
             child: Obx(
-              () => ListView.builder(
-                controller: scrollController,
-                padding: const EdgeInsets.all(20),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final msg = messages[index];
-                  return chatBubble(
-                    msg.content,
-                    msg.senderId == identity.id,
-                    DateFormat.Hm().format(msg.createdAt),
-                  );
-                },
-              ),
+              () {
+                final messages =
+                    c.roomMessages[widget.roomCode] ?? RxList<Message>();
+                return ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = messages[index];
+                    return chatBubble(
+                      msg.content,
+                      msg.senderId == identity.id,
+                      DateFormat.Hm().format(msg.createdAt),
+                    );
+                  },
+                );
+              },
             ),
           ),
 
@@ -156,15 +151,7 @@ class _ChatDetailState extends State<ChatDetail> {
 
     textEditingController.clear();
 
-    await Future.delayed(Duration(milliseconds: 500));
-
-    if (scrollController.hasClients) {
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 400),
-        curve: Curves.easeOut,
-      );
-    }
+    Future.delayed(Duration(milliseconds: 50), _scrollToBottom);
   }
 
   Widget chatBubble(String text, bool isMe, String time) {

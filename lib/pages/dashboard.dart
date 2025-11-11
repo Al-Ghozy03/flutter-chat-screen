@@ -70,8 +70,9 @@ class _DashboardPageState extends State<DashboardPage> {
                       orElse: () => chatModel.data[0],
                     );
 
+                    c.setMessages(selectedChat.roomCode, selectedChat.messages);
+
                     return ChatDetail(
-                      message: selectedChat.messages,
                       roomCode: selectedChat.roomCode,
                       user: selectedChat.user1.id == identity.id
                           ? selectedChat.user2

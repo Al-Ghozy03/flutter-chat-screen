@@ -82,7 +82,6 @@ class ChatList extends StatelessWidget {
                             : "",
                       ),
                       onTap: () {
-                        socketService.joinRoom(chat.roomCode);
                         c.selectChat(chat.id);
                       },
                     ),
