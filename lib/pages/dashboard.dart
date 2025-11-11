@@ -61,29 +61,24 @@ class _DashboardPageState extends State<DashboardPage> {
                   flex: 3,
                   child: Obx(() {
                     final ChatModel chatModel = snapshot.data;
-                    DataChat? selectedChat;
-                    try {
-                      selectedChat = chatModel.data.firstWhere(
-                        (chat) => chat.id == c.selectedChatId.value,
-                      );
-                    } catch (e) {
-                      selectedChat = null;
+                    if (c.selectedChatId.value == 0) {
+                      return const Center(child: Text("Welcome"));
                     }
-                    return c.selectedChatId.value != 0
-                        ? ChatDetail(
-                            message: selectedChat!.messages,
-                            roomCode: selectedChat.roomCode,
-                            user: selectedChat.user1.id == identity.id
-                                ? selectedChat.user2
-                                : selectedChat.user1,
-                          )
-                        : const Center(
-                            child: Text(
-                            "Welcome",
-                            style: TextStyle(fontSize: 50),
-                          ));
+
+                    final selectedChat = chatModel.data.firstWhere(
+                      (element) => element.id == c.selectedChatId.value,
+                      orElse: () => chatModel.data[0],
+                    );
+
+                    return ChatDetail(
+                      message: selectedChat.messages,
+                      roomCode: selectedChat.roomCode,
+                      user: selectedChat.user1.id == identity.id
+                          ? selectedChat.user2
+                          : selectedChat.user1,
+                    );
                   }),
-                )
+                ),
               ],
             );
           }

@@ -5,18 +5,12 @@ import 'package:flutter_chat_screen/models/identity.dart';
 import 'package:flutter_chat_screen/services/socket.dart';
 import 'package:flutter_chat_screen/utils/storage.dart';
 import 'package:flutter_chat_screen/utils/time_format.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
-import 'package:get/instance_manager.dart';
+import 'package:get/get.dart';
 
-class ChatList extends StatefulWidget {
-  ChatModel chats;
+class ChatList extends StatelessWidget {
+  final ChatModel chats;
   ChatList({super.key, required this.chats});
 
-  @override
-  State<ChatList> createState() => _ChatListState();
-}
-
-class _ChatListState extends State<ChatList> {
   final c = Get.find<DashboardController>();
   final Identity identity = getIdentity();
   final socketService = Get.find<SocketService>();
@@ -57,52 +51,49 @@ class _ChatListState extends State<ChatList> {
 
           // LIST CHAT
           Expanded(
-              child: ListView.builder(
-            itemCount: widget.chats.data.length,
-            itemBuilder: (context, index) {
-              return _listChat(widget.chats, index, identity);
-            },
-          )),
+            child: ListView.builder(
+              itemCount: chats.data.length,
+              itemBuilder: (context, index) {
+                final chat = chats.data[index];
+                return Obx(() {
+                  bool isSelected = c.selectedChatId.value == chat.id;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color.fromARGB(255, 235, 240, 255)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ListTile(
+                      leading: const CircleAvatar(),
+                      title: Text(
+                        chat.user1.id == identity.id
+                            ? chat.user2.name
+                            : chat.user1.name,
+                      ),
+                      subtitle: Text(
+                        chat.messages.isNotEmpty
+                            ? "${chat.messages.last.senderId == identity.id ? "You: " : ""}${chat.messages.last.content}"
+                            : "(No messages)",
+                      ),
+                      trailing: Text(
+                        chat.messages.isNotEmpty
+                            ? formatTimestamp(chat.messages.last.createdAt)
+                            : "",
+                      ),
+                      onTap: () {
+                        socketService.joinRoom(chat.roomCode);
+                        c.selectChat(chat.id);
+                      },
+                    ),
+                  );
+                });
+              },
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  Widget _listChat(ChatModel chatModel, int i, Identity identity) {
-    var data = chatModel.data[i];
-
-    return Obx(() {
-      bool isSelected = c.selectedChatId.value == data.id;
-
-      return Container(
-        decoration: BoxDecoration(
-          color: isSelected
-              ? const Color.fromARGB(255, 235, 240, 255)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: ListTile(
-          leading: const CircleAvatar(),
-          title: Text(
-            data.user1.id == identity.id ? data.user2.name : data.user1.name,
-          ),
-          subtitle: Text(
-            data.messages.isNotEmpty
-                ? "${data.messages.last.senderId == identity.id ? "You: " : ""}${data.messages.last.content}"
-                : "(No messages)",
-          ),
-          trailing: Text(
-            data.messages.isNotEmpty
-                ? formatTimestamp(data.messages.last.createdAt)
-                : "",
-          ),
-          onTap: () {
-            socketService.joinRoom(data.roomCode);
-            c.selectChat(data.id);
-          },
-        ),
-      );
-    });
   }
 
   Widget tab(String text) {
