@@ -7,7 +7,7 @@ import 'package:flutter_chat_screen/models/chat_model.dart';
 import 'package:flutter_chat_screen/models/identity.dart';
 import 'package:flutter_chat_screen/utils/storage.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
-import 'package:flutter_chat_screen/api/chats.dart';
+import 'package:flutter_chat_screen/services/chats.dart';
 import 'package:get/instance_manager.dart';
 
 class DashboardPage extends StatefulWidget {

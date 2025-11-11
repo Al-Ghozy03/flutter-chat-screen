@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_screen/api/auth.dart';
+import 'package:flutter_chat_screen/services/auth.dart';
 import 'package:flutter_chat_screen/pages/dashboard.dart';
 import 'package:flutter_chat_screen/pages/register.dart';
 import 'package:get/get.dart';
