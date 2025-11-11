@@ -142,7 +142,7 @@ class _ChatDetailState extends State<ChatDetail> {
     );
   }
 
-  void _sendMessage(String value) {
+  void _sendMessage(String value) async {
     final text = value.trim();
     if (text.isEmpty) return;
 
@@ -155,7 +155,16 @@ class _ChatDetailState extends State<ChatDetail> {
     );
 
     textEditingController.clear();
-    _scrollToBottom();
+
+    await Future.delayed(Duration(milliseconds: 500));
+
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 400),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   Widget chatBubble(String text, bool isMe, String time) {
