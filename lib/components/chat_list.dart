@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
 import 'package:flutter_chat_screen/models/chat_model.dart';
 import 'package:flutter_chat_screen/models/identity.dart';
+import 'package:flutter_chat_screen/services/socket.dart';
 import 'package:flutter_chat_screen/utils/storage.dart';
 import 'package:flutter_chat_screen/utils/time_format.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
@@ -18,6 +19,7 @@ class ChatList extends StatefulWidget {
 class _ChatListState extends State<ChatList> {
   final c = Get.find<DashboardController>();
   final Identity identity = getIdentity();
+  final socketService = Get.find<SocketService>();
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +96,10 @@ class _ChatListState extends State<ChatList> {
                 ? formatTimestamp(data.messages.last.createdAt)
                 : "",
           ),
-          onTap: () => c.selectChat(data.id),
+          onTap: () {
+            socketService.joinRoom(data.roomCode);
+            c.selectChat(data.id);
+          },
         ),
       );
     });
