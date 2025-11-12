@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
-import 'package:flutter_chat_screen/models/chat_model.dart';
 import 'package:flutter_chat_screen/models/identity.dart';
-import 'package:flutter_chat_screen/services/socket.dart';
 import 'package:flutter_chat_screen/utils/storage.dart';
 import 'package:flutter_chat_screen/utils/time_format.dart';
 import 'package:get/get.dart';
 
-class ChatList extends StatelessWidget {
-  final ChatModel chats;
-  ChatList({super.key, required this.chats});
-
-  final c = Get.find<DashboardController>();
-  final Identity identity = getIdentity();
-  final socketService = Get.find<SocketService>();
+class ChatList extends StatefulWidget {
+  const ChatList({super.key});
 
   @override
+  State<ChatList> createState() => _ChatListState();
+}
+
+class _ChatListState extends State<ChatList> {
+  @override
   Widget build(BuildContext context) {
+    final c = Get.find<DashboardController>();
+    final Identity identity = getIdentity();
+
     return Container(
       color: Colors.white,
       child: Column(
@@ -51,59 +52,62 @@ class ChatList extends StatelessWidget {
 
           // LIST CHAT
           Expanded(
-            child: ListView.builder(
-              itemCount: chats.data.length,
-              itemBuilder: (context, index) {
-                final chat = chats.data[index];
-                return Obx(() {
-                  bool isSelected = c.selectedChatId.value == chat.id;
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color.fromARGB(255, 235, 240, 255)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: ListTile(
-                      leading: const CircleAvatar(),
-                      title: Text(
-                        chat.user1.id == identity.id
-                            ? chat.user2.name
-                            : chat.user1.name,
+            child: Obx(() {
+              final chats = c.chatList;
+
+              return ListView.builder(
+                itemCount: chats.length,
+                itemBuilder: (context, index) {
+                  final chat = chats[index];
+                  final lastMsg =
+                      chat.messages.isNotEmpty ? chat.messages.last : null;
+
+                  return Obx(() {
+                    final isSelected = c.selectedChatId.value == chat.id;
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color.fromARGB(255, 235, 240, 255)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      subtitle: Text(
-                        chat.messages.isNotEmpty
-                            ? "${chat.messages.last.senderId == identity.id ? "You: " : ""}${chat.messages.last.content}"
-                            : "(No messages)",
+                      child: ListTile(
+                        leading: const CircleAvatar(),
+                        title: Text(
+                          chat.user1.id == identity.id
+                              ? chat.user2.name
+                              : chat.user1.name,
+                        ),
+                        subtitle: Text(
+                          lastMsg != null
+                              ? "${lastMsg.senderId == identity.id ? "You: " : ""}${lastMsg.content}"
+                              : "(No messages)",
+                        ),
+                        trailing: Text(
+                          lastMsg != null
+                              ? formatTimestamp(lastMsg.createdAt)
+                              : "",
+                        ),
+                        onTap: () => c.selectChat(chat.id),
                       ),
-                      trailing: Text(
-                        chat.messages.isNotEmpty
-                            ? formatTimestamp(chat.messages.last.createdAt)
-                            : "",
-                      ),
-                      onTap: () {
-                        c.selectChat(chat.id);
-                      },
-                    ),
-                  );
-                });
-              },
-            ),
+                    );
+                  });
+                },
+              );
+            }),
           ),
         ],
       ),
     );
   }
 
-  Widget tab(String text) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.grey.shade200,
-      ),
-      child: Text(text),
-    );
-  }
+  Widget tab(String text) => Container(
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.grey.shade200,
+        ),
+        child: Text(text),
+      );
 }

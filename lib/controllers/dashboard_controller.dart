@@ -1,27 +1,35 @@
 import 'package:flutter_chat_screen/models/chat_model.dart';
-import 'package:get/state_manager.dart';
+import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
   RxInt selectedChatId = 0.obs;
+  RxList<DataChat> chatList = <DataChat>[].obs;
   RxMap<String, RxList<Message>> roomMessages = <String, RxList<Message>>{}.obs;
-  RxList<ChatModel> chatList = <ChatModel>[].obs;
 
-  void setChatList(List<ChatModel> chats) {
+  void setChatList(List<DataChat> chats) {
     chatList.assignAll(chats);
-  }
-
-  void setMessages(String roomCode, List<Message> msgs) {
-    roomMessages[roomCode] = RxList<Message>.from(msgs);
-  }
-
-  void addMessage(String roomCode, Message msg) {
-    if (!roomMessages.containsKey(roomCode)) {
-      roomMessages[roomCode] = RxList<Message>();
+    for (final chat in chats) {
+      roomMessages[chat.roomCode] = RxList<Message>.from(chat.messages);
     }
-    roomMessages[roomCode]!.add(msg);
   }
 
   void selectChat(int id) {
     selectedChatId.value = id;
+  }
+
+  void setMessages(String roomCode, List<Message> msgs) {
+    roomMessages[roomCode] ??= <Message>[].obs;
+    roomMessages[roomCode]!.assignAll(msgs);
+  }
+
+  void addMessage(String roomCode, Message msg) {
+    roomMessages[roomCode] ??= <Message>[].obs;
+    roomMessages[roomCode]!.add(msg);
+
+    final idx = chatList.indexWhere((c) => c.roomCode == roomCode);
+    if (idx != -1) {
+      chatList[idx].messages.add(msg);
+      chatList.refresh();
+    }
   }
 }

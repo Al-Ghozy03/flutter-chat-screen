@@ -8,12 +8,11 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class ChatDetail extends StatefulWidget {
-  // final List<Message> message;
   final String roomCode;
   final User user;
-  ChatDetail({
+
+  const ChatDetail({
     super.key,
-    // required this.message,
     required this.roomCode,
     required this.user,
   });
@@ -28,37 +27,59 @@ class _ChatDetailState extends State<ChatDetail> {
   final DashboardController c = Get.find<DashboardController>();
 
   late TextEditingController textEditingController;
-  // late RxList<Message> messages;
+  late Worker messageListener;
   ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     textEditingController = TextEditingController();
+
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
-    ever(socketService.newMessage, (msg) {
-      if (msg == null) return;
+    _listenToSocket();
 
+    socketService.joinRoom(widget.roomCode);
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatDetail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.roomCode != widget.roomCode) {
+      messageListener.dispose();
+
+      socketService.joinRoom(widget.roomCode);
+      _listenToSocket();
+    }
+  }
+
+  void _listenToSocket() {
+    messageListener = ever(socketService.newMessage, (msg) {
+      if (msg == null) return;
       if (msg.roomCode == widget.roomCode) {
         c.addMessage(widget.roomCode, msg);
         _scrollToBottom();
       }
     });
-
-    socketService.joinRoom(widget.roomCode);
   }
 
   void _scrollToBottom() {
-    if (scrollController.hasClients) {
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
-    }
+    Future.delayed(Duration(milliseconds: 20), () {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
     textEditingController.dispose();
     scrollController.dispose();
+    messageListener.dispose();
     super.dispose();
   }
 
@@ -68,12 +89,11 @@ class _ChatDetailState extends State<ChatDetail> {
       color: const Color(0xfff6f8fb),
       child: Column(
         children: [
-          // HEADER
           Container(
             height: 70,
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            alignment: Alignment.centerLeft,
             color: Colors.white,
+            alignment: Alignment.centerLeft,
             child: Row(
               children: [
                 const CircleAvatar(),
@@ -82,31 +102,26 @@ class _ChatDetailState extends State<ChatDetail> {
               ],
             ),
           ),
-
-          // CHAT CONTENT
           Expanded(
-            child: Obx(
-              () {
-                final messages =
-                    c.roomMessages[widget.roomCode] ?? RxList<Message>();
-                return ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(20),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = messages[index];
-                    return chatBubble(
-                      msg.content,
-                      msg.senderId == identity.id,
-                      DateFormat.Hm().format(msg.createdAt),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
+            child: Obx(() {
+              final messages =
+                  c.roomMessages[widget.roomCode] ?? <Message>[].obs;
 
-          // INPUT MESSAGE
+              return ListView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.all(20),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final msg = messages[index];
+                  return chatBubble(
+                    msg.content,
+                    msg.senderId == identity.id,
+                    DateFormat.Hm().format(msg.createdAt),
+                  );
+                },
+              );
+            }),
+          ),
           Container(
             padding: const EdgeInsets.all(12),
             color: Colors.white,
@@ -137,56 +152,52 @@ class _ChatDetailState extends State<ChatDetail> {
     );
   }
 
-  void _sendMessage(String value) async {
-    final text = value.trim();
-    if (text.isEmpty) return;
+  void _sendMessage(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
 
     socketService.sendMessage(
       c.selectedChatId.value,
       identity.id,
-      text,
+      trimmed,
       widget.roomCode,
       null,
     );
 
     textEditingController.clear();
-
-    Future.delayed(Duration(milliseconds: 50), _scrollToBottom);
+    Future.delayed(const Duration(milliseconds: 50), _scrollToBottom);
   }
 
-  Widget chatBubble(String text, bool isMe, String time) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-      child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: isMe
-            ? [
-                Text(time, style: const TextStyle(fontSize: 10)),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
-                    borderRadius: BorderRadius.circular(12),
+  Widget chatBubble(String text, bool isMe, String time) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        child: Row(
+          mainAxisAlignment:
+              isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: isMe
+              ? [
+                  Text(time, style: const TextStyle(fontSize: 10)),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(text),
                   ),
-                  child: Text(text),
-                ),
-              ]
-            : [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                ]
+              : [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(text),
                   ),
-                  child: Text(text),
-                ),
-                const SizedBox(width: 8),
-                Text(time, style: const TextStyle(fontSize: 10)),
-              ],
-      ),
-    );
-  }
+                  const SizedBox(width: 8),
+                  Text(time, style: const TextStyle(fontSize: 10)),
+                ],
+        ),
+      );
 }
