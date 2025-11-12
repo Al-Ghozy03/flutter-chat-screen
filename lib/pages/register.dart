@@ -18,11 +18,15 @@ class _RegisterPageState extends State<RegisterPage> {
   final nameController = TextEditingController();
   final passwordController = TextEditingController();
   final box = GetStorage();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     void handleRegister() async {
       try {
+        setState(() {
+          isLoading = true;
+        });
         final response = await register(
             emailController.text, nameController.text, passwordController.text);
         box.write("token", response["token"]);
@@ -30,6 +34,10 @@ class _RegisterPageState extends State<RegisterPage> {
         Get.off(() => DashboardPage());
       } catch (e) {
         Get.snackbar("Failed", e.toString(), backgroundColor: Colors.red);
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
 
@@ -123,8 +131,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   onPressed: () => handleRegister(),
-                  child: const Text(
-                    'Register',
+                  child: Text(
+                    isLoading ? "Loading..." : 'Register',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),

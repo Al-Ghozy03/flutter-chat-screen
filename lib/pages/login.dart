@@ -18,11 +18,15 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final box = GetStorage();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     void handleLogin() async {
       try {
+        setState(() {
+          isLoading = true;
+        });
         final response =
             await login(emailController.text, passwordController.text);
         box.write("token", response["token"]);
@@ -30,6 +34,10 @@ class _LoginPageState extends State<LoginPage> {
         Get.off(() => DashboardPage());
       } catch (e) {
         Get.snackbar("Failed", e.toString(), backgroundColor: Colors.red);
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
 
@@ -108,8 +116,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   onPressed: () => handleLogin(),
-                  child: const Text(
-                    'Login',
+                  child: Text(
+                    isLoading ? "Loading..." : 'Login',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
