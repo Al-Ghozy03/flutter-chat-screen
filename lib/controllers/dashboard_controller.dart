@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_chat_screen/models/chat_model.dart';
 import 'package:get/get.dart';
 
@@ -6,6 +7,12 @@ class DashboardController extends GetxController {
   RxList<DataChat> chatList = <DataChat>[].obs;
   RxMap<String, RxList<Message>> roomMessages = <String, RxList<Message>>{}.obs;
 
+  Color getUserStatusColor(DataChat? chat, int identityId) {
+    if (chat == null) return Colors.grey;
+    final user = (chat.user1.id == identityId) ? chat.user2 : chat.user1;
+    return user.status.value == 'online' ? Colors.green : Colors.grey;
+  }
+
   void setChatList(List<DataChat> chats) {
     chatList.assignAll(chats);
     for (final chat in chats) {
@@ -13,9 +20,7 @@ class DashboardController extends GetxController {
     }
   }
 
-  void selectChat(int id) {
-    selectedChatId.value = id;
-  }
+  void selectChat(int id) => selectedChatId.value = id;
 
   void setMessages(String roomCode, List<Message> msgs) {
     roomMessages[roomCode] ??= <Message>[].obs;

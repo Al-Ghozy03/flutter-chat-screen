@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:get/get.dart';
+
 ChatModel chatModelFromJson(String str) => ChatModel.fromJson(json.decode(str));
 
 String chatModelToJson(ChatModel data) => json.encode(data.toJson());
@@ -115,12 +117,16 @@ class User {
   String name;
   String email;
   dynamic avatarUrl;
+  RxString status;
+  dynamic lastOnline;
 
   User({
     required this.id,
     required this.name,
     required this.email,
     required this.avatarUrl,
+    required this.status,
+    required this.lastOnline,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -128,6 +134,8 @@ class User {
         name: json["name"],
         email: json["email"],
         avatarUrl: json["avatar_url"],
+        status: (json["status"] ?? 'offline').toString().obs,
+        lastOnline: json["last_online"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -135,5 +143,7 @@ class User {
         "name": name,
         "email": email,
         "avatar_url": avatarUrl,
+        "status": status.value,
+        "last_online": lastOnline,
       };
 }

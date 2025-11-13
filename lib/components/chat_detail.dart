@@ -94,13 +94,41 @@ class _ChatDetailState extends State<ChatDetail> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             color: Colors.white,
             alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                const CircleAvatar(),
-                const SizedBox(width: 10),
-                Text(widget.user.name, style: const TextStyle(fontSize: 18)),
-              ],
-            ),
+            child: Obx(() {
+              final checkUser = c.chatList.firstWhereOrNull(
+                (element) =>
+                    element.user1.id == identity.id ||
+                    element.user2.id == identity.id,
+              );
+
+              return Row(
+                children: [
+                  Stack(
+                    children: [
+                      const CircleAvatar(),
+                      Positioned(
+                        right: 2,
+                        bottom: 2,
+                        child: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: c.getUserStatusColor(checkUser, identity.id),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 10),
+                  Text(widget.user.name, style: const TextStyle(fontSize: 18)),
+                ],
+              );
+            }),
           ),
           Expanded(
             child: Obx(() {

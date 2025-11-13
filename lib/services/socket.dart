@@ -1,5 +1,6 @@
+import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
 import 'package:flutter_chat_screen/models/chat_model.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:get/get.dart';
 import 'package:get/state_manager.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -26,6 +27,27 @@ class SocketService extends GetxService {
       newMessage.value = Message.fromSocketJson(data);
     });
 
+    socket.on("retrieveUserStatus", (data) {
+      final DashboardController controller = Get.find<DashboardController>();
+      var selectedChat = controller.chatList.firstWhereOrNull(
+        (element) =>
+            element.user1.id == data["id"] || element.user2.id == data["id"],
+      );
+
+      if (selectedChat != null) {
+        if (selectedChat.user1.id == data["id"]) {
+          selectedChat.user1.status.value = data["status"];
+          selectedChat.user1.lastOnline = data["last_online"];
+        }
+
+        if (selectedChat.user2.id == data["id"]) {
+          selectedChat.user2.status.value = data["status"];
+          selectedChat.user2.lastOnline = data["last_online"];
+        }
+      }
+      controller.chatList.refresh();
+    });
+
     super.onInit();
   }
 
@@ -47,5 +69,9 @@ class SocketService extends GetxService {
       "attachment_url": attachmentUrl,
       "room_code": roomCode,
     });
+  }
+
+  void sendUserStatus(int id, String status) {
+    socket.emit("userStatus", {"user_id": id, "status": status});
   }
 }
