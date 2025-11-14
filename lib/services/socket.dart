@@ -37,7 +37,7 @@ class SocketService extends GetxService {
       final idx =
           controller.chatList.indexWhere((c) => c.roomCode == msg.roomCode);
       if (idx != -1) {
-        controller.chatList[idx].messages.add(msg);
+        controller.chatList[idx].messages!.add(msg);
         controller.chatList.refresh();
       }
     });

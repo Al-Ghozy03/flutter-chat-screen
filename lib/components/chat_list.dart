@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_screen/components/user_modal.dart';
 import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
 import 'package:flutter_chat_screen/models/identity.dart';
 import 'package:flutter_chat_screen/utils/storage.dart';
@@ -21,6 +22,7 @@ class _ChatListState extends State<ChatList> {
     return Container(
       color: Colors.white,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // TAB FILTER
           Container(
@@ -47,6 +49,20 @@ class _ChatListState extends State<ChatList> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: ElevatedButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => UserModal(),
+                );
+              },
+              child: Text("New chat"),
             ),
           ),
 
