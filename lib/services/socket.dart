@@ -1,5 +1,7 @@
 import 'package:flutter_chat_screen/controllers/dashboard_controller.dart';
 import 'package:flutter_chat_screen/models/chat_model.dart';
+import 'package:flutter_chat_screen/models/identity.dart';
+import 'package:flutter_chat_screen/utils/storage.dart';
 import 'package:get/get.dart';
 import 'package:get/state_manager.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -24,7 +26,20 @@ class SocketService extends GetxService {
     });
 
     socket.on("retrieveMessage", (data) {
-      newMessage.value = Message.fromSocketJson(data);
+      final msg = Message.fromSocketJson(data);
+      newMessage.value = msg;
+      final Identity identity = getIdentity();
+      // print("user ${identity.id} - ${identity.name} dapat data $data");
+      final DashboardController controller = Get.find<DashboardController>();
+
+      controller.addMessage(msg.roomCode!, msg);
+
+      final idx =
+          controller.chatList.indexWhere((c) => c.roomCode == msg.roomCode);
+      if (idx != -1) {
+        controller.chatList[idx].messages.add(msg);
+        controller.chatList.refresh();
+      }
     });
 
     socket.on("retrieveUserStatus", (data) {

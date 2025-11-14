@@ -39,7 +39,7 @@ class _ChatDetailState extends State<ChatDetail> {
 
     _listenToSocket();
 
-    socketService.joinRoom(widget.roomCode);
+    // socketService.joinRoom(widget.roomCode);
   }
 
   @override
@@ -48,7 +48,7 @@ class _ChatDetailState extends State<ChatDetail> {
     if (oldWidget.roomCode != widget.roomCode) {
       messageListener.dispose();
 
-      socketService.joinRoom(widget.roomCode);
+      // socketService.joinRoom(widget.roomCode);
       _listenToSocket();
     }
   }
@@ -57,7 +57,7 @@ class _ChatDetailState extends State<ChatDetail> {
     messageListener = ever(socketService.newMessage, (msg) {
       if (msg == null) return;
       if (msg.roomCode == widget.roomCode) {
-        c.addMessage(widget.roomCode, msg);
+        // c.addMessage(widget.roomCode, msg);
         _scrollToBottom();
       }
     });

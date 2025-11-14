@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_screen/models/chat_model.dart';
+import 'package:flutter_chat_screen/services/socket.dart';
 import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
@@ -15,8 +16,11 @@ class DashboardController extends GetxController {
 
   void setChatList(List<DataChat> chats) {
     chatList.assignAll(chats);
+    final socket = Get.find<SocketService>();
+
     for (final chat in chats) {
       roomMessages[chat.roomCode] = RxList<Message>.from(chat.messages);
+      socket.joinRoom(chat.roomCode);
     }
   }
 

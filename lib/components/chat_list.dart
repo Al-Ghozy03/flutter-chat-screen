@@ -55,10 +55,22 @@ class _ChatListState extends State<ChatList> {
             child: Obx(() {
               final chats = c.chatList;
 
+              final sortedChats = [...chats];
+
+              sortedChats.sort((a, b) {
+                final aTime = a.messages.isNotEmpty
+                    ? a.messages.last.createdAt
+                    : DateTime.fromMillisecondsSinceEpoch(0);
+                final bTime = b.messages.isNotEmpty
+                    ? b.messages.last.createdAt
+                    : DateTime.fromMillisecondsSinceEpoch(0);
+                return bTime.compareTo(aTime);
+              });
+
               return ListView.builder(
-                itemCount: chats.length,
+                itemCount: sortedChats.length,
                 itemBuilder: (context, index) {
-                  final chat = chats[index];
+                  final chat = sortedChats[index];
                   final lastMsg =
                       chat.messages.isNotEmpty ? chat.messages.last : null;
 
